@@ -1,0 +1,49 @@
+import processing.serial.*;
+
+Serial arduino;
+float angle = 0;
+
+void setup() {
+  size(600, 400);
+  String portName = "COM7"; 
+  arduino = new Serial(this, portName, 9600);
+  arduino.bufferUntil('\n');
+}
+
+void draw() {
+  background(255);
+  fill(0);
+  textSize(20);
+  text("Angle: " + angle, 20, 30);
+
+  // pendulum data
+  float originX = width / 2;
+  float originY = 150;
+  float len = 150;
+
+  // Base
+  fill(180);
+  rectMode(CENTER);
+  rect(originX, originY + 10, 200, 20);
+//position
+  float angleRad = radians(angle);
+  float x = originX + len * sin(angleRad);
+  float y = originY + len * cos(angleRad);
+
+  // Pendulum
+  stroke(0);
+  strokeWeight(2);
+  line(originX, originY, x, y);
+  fill(100);
+  ellipse(x, y, 30, 30);
+}
+void serialEvent(Serial arduino) {
+  String data = arduino.readStringUntil('\n');
+  if (data != null) {
+    data = trim(data);
+    println("Received: " + data);
+    if (data.matches("-?\\d+(\\.\\d+)?")) {
+      angle = float(data);
+    }
+  }
+}
